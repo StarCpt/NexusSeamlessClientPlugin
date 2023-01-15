@@ -90,7 +90,7 @@ namespace SeamlessClientPlugin
         private const bool Debug = true;
         private static bool _initilized;
 
-        private const ushort SeamlessClientNetId = 2936;
+        public const ushort SeamlessClientNetId = 2936;
 
         public static bool IsSwitching = false;
         public static bool RanJoin = false;
