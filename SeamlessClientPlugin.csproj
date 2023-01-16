@@ -126,6 +126,7 @@
     <Compile Include="SeamlessTransfer\PingServer.cs" />
     <Compile Include="Messages\Transfer.cs" />
     <Compile Include="Utilities\OnlinePlayers.cs" />
+    <Compile Include="Utilities\OnlinePlayersComms.cs" />
     <Compile Include="Utilities\Patches.cs" />
     <Compile Include="SeamlessTransfer\SwitchServers.cs" />
     <Compile Include="Utilities\Utility.cs" />
