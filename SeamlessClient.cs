@@ -104,7 +104,7 @@ namespace SeamlessClientPlugin
 
             Patches.GetPatches();
             OnlinePlayers.Patch();
-            OnlinePlayersComms.Patch();
+            DirectMessagePatch.Patch();
             TryShow("Initializing Communications!");
             RunInit();
         }
