@@ -416,7 +416,7 @@ namespace SeamlessClientPlugin.SeamlessTransfer
                 }
 
                 // Randomly pick a loading screen from the available backgrounds
-                var rInt = r.Next(0, backgrounds.Count() - 1);
+                var rInt = r.Next(0, backgrounds.Count);
                 File = backgrounds[rInt];
                 return true;
             }
