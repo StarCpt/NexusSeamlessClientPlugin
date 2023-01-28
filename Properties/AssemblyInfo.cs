@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("SeamlessClientPlugin")]
 [assembly: AssemblyDescription("A seamless client plugin for Nexus compatible servers")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Voxel Games")]
+[assembly: AssemblyCompany("Nexus")]
 [assembly: AssemblyProduct("SeamlessClientPlugin")]
 [assembly: AssemblyCopyright("Copyright © 2022")]
 [assembly: AssemblyTrademark("")]
@@ -33,6 +33,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.5.0.0")]
-[assembly: AssemblyFileVersion("1.5.0.0")]
+[assembly: AssemblyVersion("1.5.2.0")]
+[assembly: AssemblyFileVersion("1.5.2.0")]
 [assembly: NeutralResourcesLanguage("en")]
