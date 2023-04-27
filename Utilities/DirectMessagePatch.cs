@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using HarmonyLib;
 using Sandbox.Engine.Multiplayer;
 using Sandbox.Game.Gui;
 using Sandbox.Game.Localization;
+using Sandbox.Game.Multiplayer;
 using Sandbox.Game.World;
 using Sandbox.Graphics.GUI;
 using SeamlessClientPlugin.Messages;
@@ -50,8 +52,66 @@ namespace SeamlessClientPlugin.Utilities
 			
 			Patcher.Patch(refreshPlayerListMethod, prefix: new HarmonyMethod(GetPatchMethod(nameof(RefreshPlayers))));
 			Patcher.Patch(closeMethod, prefix: new HarmonyMethod(GetPatchMethod(nameof(OnCloseScreen))));
-			Patcher.Patch(commandChannelWhisperMethod, prefix: new HarmonyMethod(GetPatchMethod(nameof(CommandChannelWhisperNexus))));
+			Patcher.Patch(commandChannelWhisperMethod, transpiler: new HarmonyMethod(GetPatchMethod(nameof(Transpiler))));
 			
+		}
+
+		public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator gen)
+		{
+			List<CodeInstruction> list = instructions.ToList();
+			LocalBuilder local = gen.DeclareLocal(typeof(long));
+			List<int> index = new List<int>();
+			for (int i = 0; i < list.Count(); i++)
+			{
+				if (list[i].Calls(AccessTools.Method(typeof(MyPlayerCollection), "GetPlayerByName")))
+				{
+					list[i - 3].MoveLabelsTo(list[i - 1]);
+					list[i] = new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(DirectMessagePatch), nameof(PlayerByNameNexus)));
+					index.Add(i - 2);
+					index.Add(i - 3);
+				}
+				else if (list[i].opcode == OpCodes.Ldloc_2)
+				{
+					list[i] = new CodeInstruction(OpCodes.Ldloc, local);
+				}
+				else if (list[i].opcode == OpCodes.Stloc_2)
+				{
+					list[i] = new CodeInstruction(OpCodes.Stloc, local);
+				}
+				else if (list[i].Calls(AccessTools.Method(typeof(MyPlayer), "get_Identity")) || list[i].Calls(AccessTools.Method(typeof(MyIdentity), "get_IdentityId")))
+				{
+					index.Add(i);
+				}
+			}
+			for (int i = 0; i < list.Count; i++)
+			{
+				if (!index.Contains(i))
+					yield return list[i];
+			}
+		}
+
+		public static long PlayerByNameNexus(string name)
+		{
+			long id = 0L;
+			MyPlayer playerByName = MySession.Static.Players.GetPlayerByName(name);
+			if (playerByName != null)
+			{
+				id = playerByName.Identity.IdentityId;
+			}
+			if (id == 0 && OnlinePlayers.AllServers.Count > 0)
+			{
+				foreach (var server in OnlinePlayers.AllServers)
+				{
+					foreach (OnlinePlayer player in server.Players)
+					{
+						if (player.PlayerName == name)
+						{
+							return player.IdentityID;
+						}
+					}
+				}
+			}
+			return id;
 		}
 
 		public static bool RefreshPlayers(Type __instance)
@@ -123,129 +183,6 @@ namespace SeamlessClientPlugin.Utilities
 				playerList.Add(m_globalItem);
 			}
 
-			return false;
-		}
-
-		public static bool CommandChannelWhisperNexus(string[] args )
-		{
-			string name = string.Empty;
-            string msg = string.Empty;
-
-            if (args == null || args.Length < 1)
-            {
-                MyHud.Chat.ShowMessage(MyTexts.GetString(MyCommonTexts.ChatCommand_Texts_Author), MyTexts.GetString(MyCommonTexts.ChatCommand_Texts_WhisperChatTarget));
-                return false;
-            }
-
-            if(args[0].Length > 0 && args[0][0] == '\"')
-            {
-                // compound name - '/w "name with spaces" message with spaces' should send "message with spaces" to player 'name with spaces', if you know how to do it through regex or have time to cleane it, you are welcome to do so, we are out of time.
-                int index = 0;
-                bool found = false;
-                while(index < args.Length)
-                {
-                    if(args[index][args[index].Length-1] == '"')
-                    {
-                        found = true;
-                        break;
-                    }
-                    index++;
-                }
-                if(found)
-                {
-                    if(index == 0)
-                    {
-                        name = (args[0].Length > 2)?args[0].Substring(1,args[0].Length-2):string.Empty;
-
-                        if (index < args.Length - 1)
-                        {
-                            string text = args[1];
-                            int i = 2;
-                            while (i < args.Length)
-                            {
-                                text += " " + args[i];
-                                i++;
-                            }
-                            msg = text;
-                        }
-                    }
-                    else
-                    {
-                        string textN = args[0];
-                        int i = 1;
-                        while (i <= index)
-                        {
-                            textN += " " + args[i];
-                            i++;
-                        }
-                        name = (textN.Length > 2)?textN.Substring(1,textN.Length-2):string.Empty;
-
-                        if (index < args.Length - 1)
-                        {
-                            string text = args[index+1];
-                            i = index+2;
-                            while (i < args.Length)
-                            {
-                                text += " " + args[i];
-                                i++;
-                            }
-                            msg = text;
-                        }
-                    }
-                }
-                else
-                {
-                    name = args[0];
-                    if (args.Length > 1)
-                    {
-                        string text = args[1];
-                        int i = 2;
-                        while (i < args.Length)
-                        {
-                            text += " " + args[i];
-                            i++;
-                        }
-                        msg = text;
-                    }
-                }
-            }
-            else
-            {
-                // simple name
-
-                name = args[0];
-
-                if(args.Length > 1 )
-                {
-                    string text = args[1];
-                    int i = 2;
-                    while(i < args.Length)
-                    {
-                        text += " " + args[i];
-                        i++;
-                    }
-
-                    if (string.IsNullOrEmpty(text))
-                        return false;
-                    msg = text;
-                }
-            }
-            
-            var server = OnlinePlayers.AllServers.FirstOrDefault(x => x.Players.Any(y => y.PlayerName == name));
-            
-            if (server == null)
-			{
-				MyHud.Chat.ShowMessage(MyTexts.GetString(MyCommonTexts.ChatCommand_Texts_Author), MyTexts.GetString(MyCommonTexts.ChatCommand_Texts_WhisperChatTarget));
-				return false;
-			}
-            
-            var player = server.Players.FirstOrDefault(x => x.PlayerName == name);
-
-
-            MySession.Static.ChatSystem.ChangeChatChannel_Whisper(player.IdentityID);
-
-            if(!string.IsNullOrEmpty(msg))
-                guiScreenSendChatMessageMethod.Invoke(null, new object[] { msg });
 			return false;
 		}
 
