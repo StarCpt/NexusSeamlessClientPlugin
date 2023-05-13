@@ -99,8 +99,11 @@ namespace SeamlessClientPlugin
 
         public void Update()
         {
+
             if (MyAPIGateway.Multiplayer == null) return;
             if (_initilized) return;
+
+
 
             Patches.GetPatches();
             OnlinePlayers.Patch();

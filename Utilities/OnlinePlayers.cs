@@ -619,8 +619,8 @@ namespace SeamlessClientPlugin.Utilities
             {
                 NormalFont = "White",
                 HighlightFont = "White",
-                NormalTexture = MyGuiConstants.TEXTURE_HUD_VOICE_CHAT,
-                HighlightTexture = MyGuiConstants.TEXTURE_HUD_VOICE_CHAT
+                NormalTexture = MyGuiConstants.TEXTURE_BUTTON_DEFAULT_NORMAL,
+                HighlightTexture = MyGuiConstants.TEXTURE_BUTTON_DEFAULT_OUTLINELESS_HIGHLIGHT
             };
 
         static OnlinePlayers() => TotalPlayerCount = 0;
