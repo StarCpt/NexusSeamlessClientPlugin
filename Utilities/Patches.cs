@@ -275,9 +275,9 @@ namespace SeamlessClientPlugin.SeamlessTransfer
             MyLog.Default.WriteLine("Seamless Downloading mods!");
 
 
-            MyWorkshop.DownloadModsAsync(world.Checkpoint.Mods, delegate(bool success)
+            MyWorkshop.DownloadModsAsync(world.Checkpoint.Mods, delegate(MyGameServiceCallResult result)
             {
-                if (success)
+                if (result == MyGameServiceCallResult.OK)
                 {
                     MyScreenManager.CloseAllScreensNowExcept(null);
                     MyGuiSandbox.Update(16);
@@ -317,6 +317,8 @@ namespace SeamlessClientPlugin.SeamlessTransfer
                                 MyTexts.GetString(MyCommonTexts.DialogTextDownloadModsFailedSteamOffline),
                                 MySession.GameServiceName))));
                     }
+
+                    MyLog.Default.WriteLine($"Failed to download mods. Reason: {result}");
                 }
 
                 MyLog.Default.WriteLine("LoadSession() - End");

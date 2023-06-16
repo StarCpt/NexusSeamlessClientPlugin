@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using VRage.Game;
 using VRage.Game.GUI;
+using VRage.GameServices;
 
 namespace SeamlessClientPlugin.SeamlessTransfer
 {
@@ -69,9 +70,9 @@ namespace SeamlessClientPlugin.SeamlessTransfer
             MyWorkshop.DownloadModsAsync(TargetLoadMods, ModDownloadingFinished);
         }
 
-        private static void ModDownloadingFinished(bool Success)
+        private static void ModDownloadingFinished(MyGameServiceCallResult result)
         {
-            if (Success)
+            if (result == MyGameServiceCallResult.OK)
             {
                 SeamlessClient.TryShow("Mod Downloading Finished!");
                 _finishedDownloadingMods = true;
@@ -80,6 +81,7 @@ namespace SeamlessClientPlugin.SeamlessTransfer
             }
             else
             {
+                SeamlessClient.TryShow($"Mod Downloading Failed! Reason: {result}");
                 _downloadSuccess = false;
                 _finishedDownloadingMods = true;
             }
