@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using VRage.Game;
 using VRage.ObjectBuilders;
+using VRage.ObjectBuilders.Private;
 
 namespace SeamlessClientPlugin.Messages
 {
@@ -50,8 +51,8 @@ namespace SeamlessClientPlugin.Messages
             WorldData = (MyObjectBuilder_World)data[0];
             using (var memoryStream = new MemoryStream())
             {
-                MyObjectBuilderSerializer.SerializeXML(memoryStream, WorldData,
-                    MyObjectBuilderSerializer.XmlCompression.Gzip);
+                MyObjectBuilderSerializerKeen.SerializeXML(memoryStream, WorldData,
+                    MyObjectBuilderSerializerKeen.XmlCompression.Gzip);
                 this.WorldData = memoryStream.ToArray();
                 Log.Warn("Successfully Converted World");
             }
@@ -59,7 +60,7 @@ namespace SeamlessClientPlugin.Messages
 
         public MyObjectBuilder_World DeserializeWorldData()
         {
-            MyObjectBuilderSerializer.DeserializeGZippedXML<MyObjectBuilder_World>(new MemoryStream(WorldData),
+            MyObjectBuilderSerializerKeen.DeserializeGZippedXML<MyObjectBuilder_World>(new MemoryStream(WorldData),
                 out var objectBuilder);
             objectBuilder.Checkpoint.Gps.Dictionary.Add(IdentityID, GpsCollection);
 
